@@ -1,0 +1,115 @@
+import telebot
+from telebot import types
+import time
+
+wait = False
+
+def cyph(j):
+    d = [int(d) + 1 for d in str(j)]
+    hid = ''
+    for i in d:
+        if i == 10:
+            i = i - 10
+        hid += str(i)
+    hid = int(hid)
+    return(hid)
+
+def uncyph(j):
+    d = [int(d) - 1 for d in str(j)]
+    hid = ''
+    for i in d:
+        if i < 0:
+            i = i + 10
+        hid += str(i)
+    hid = int(hid)
+    return (hid)
+
+found = False
+
+f = open("saves.txt", "a")  # , encoding="utf-8")
+
+token = "7482941140:AAHZw8seV2nKmj74EIt4Mc_kiqJi8Y8GLCw"
+
+bot = telebot.TeleBot(token)
+
+
+
+@bot.message_handler(commands=['start'])
+def start(message):
+    bot.send_message(message.from_user.id, "привет я бот анонимка напиши мне любое сообщение и я отправлю это сообщение от своего лица")
+    bot.send_message(message.from_user.id,"пример: /anonim @Pechenkapro привет")
+    bot.send_message(message.from_user.id, "/anonim отвечает за отправку сообщения анонимно (а по другому не как)")
+    bot.send_message(message.from_user.id, "если захочешь вернуть сообщение введи /vernut, айди пользователя и сообщение")
+    a1 = str(message.from_user.id)
+    if message.from_user.username == None:
+        bot.send_message(message.from_user.id, "заведите себе 'юзернэйм'")
+        a2 = message.from_user.first_name
+    else:
+        a2 = message.from_user.username
+    a = "@" + a2 + " " + a1 + "\n"
+    f = open('saves.txt', 'r')
+    db = f.read()
+    f.close()
+    f = open('saves.txt', 'a')
+    if not (a in db):
+        f.write(a)
+    f.close()
+
+    markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+    btn = types.KeyboardButton("написать")
+    markup.add(btn)
+    bot.send_message(message.from_user.id,"снизу кнопка чтобы написать, если ее нет то просто напиши слово 'написать'", reply_markup=markup)
+
+    # bot.send_message(message.from_user.id,"пример @MIKHAILYANOV")
+    # users[message.from_user.first_name] = message.from_user.id
+
+
+#@bot.message_handler(commands=['users'])
+#def send(message):
+    #bot.send_message
+
+
+@bot.message_handler(content_types=['text'])
+def anonim(message):
+    global wait
+    if message.text == "написать":
+        bot.send_message(message.from_user.id, "напиши юзернейм кому ты хочешь написать")
+        us = message.from_user.id
+        print(us)
+        hid_us = cyph(us)
+        print(message.text)
+        wait = True
+    if message.text != "написать" and wait:
+        target_name = message.text
+        bot.send_message(message.from_user.id, "введи сообщение которое надо отправить")
+        if message.text != "введи сообщение которое надо отправить" and message.text != "напиши юзернейм кому ты хочешь написать" and wait:
+            target_message = message.text
+            print(target_message)
+            f = open('saves.txt', 'r')
+            line = f.readlines()
+            for line in f:
+                if target_name in line:
+                    bot.send_message(line.split()[0], target_message)
+                    bot.send_message(message.from_user.id, "айди отправителя " + str(hid_us))
+
+
+
+                    f.close()
+
+@bot.message_handler(commands=['vernut'], content_types=['text'])
+def vernut(message):
+    mcontent = message.text.split()[1::]
+    target_id = mcontent[0]
+    hid_us = uncyph(target_id)
+    mcontent = mcontent[1::]
+    target_message = ''
+    for i in mcontent:
+        target_message += i + ' '
+    bot.send_message(hid_us, target_message)
+
+
+
+# привет я бот анонимка напиши мне имя пользователея и я напишу ему от своего лица твоё сообшение
+
+bot.polling(none_stop=True)
+
