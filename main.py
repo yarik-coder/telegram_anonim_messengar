@@ -114,7 +114,7 @@ def anonim(message):
         for line in f:
             if str(us_unshifr) in line:
                 bot.send_message(line.split()[1], target_message_for_vernut)
-                text_for_vozvrat = message.from_user.id
+                text_for_vozvrat = cyph(message.from_user.id)
                 bot.send_message(line.split()[1], "сообщение написал: " + str(text_for_vozvrat))
 
 
