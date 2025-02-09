@@ -6,6 +6,7 @@ wait = False
 wait1 = False
 wait_for_command_vernut = False
 wait_for_command_vernut1 = False
+a = 0
 
 def cyph(j):
     d = [int(d) + 1 for d in str(j)]
@@ -39,10 +40,6 @@ bot = telebot.TeleBot(token)
 
 @bot.message_handler(commands=['start'])
 def start(message):
-    bot.send_message(message.from_user.id, "привет я бот анонимка напиши мне любое сообщение и я отправлю это сообщение от своего лица")
-    bot.send_message(message.from_user.id,"пример: /anonim @Pechenkapro привет")
-    bot.send_message(message.from_user.id, "/anonim отвечает за отправку сообщения анонимно (а по другому не как)")
-    bot.send_message(message.from_user.id, "если захочешь вернуть сообщение введи /vernut, айди пользователя и сообщение")
     a1 = str(message.from_user.id)
     if message.from_user.username == None:
         bot.send_message(message.from_user.id, "заведите себе 'юзернэйм'")
@@ -75,7 +72,7 @@ def start(message):
 
 @bot.message_handler(content_types=['text'])
 def anonim(message):
-    global wait, hid_us, wait1, target_name, target_message, wait_for_command_vernut, wait_for_command_vernut1, us, us_unshifr, target_message_for_vernut
+    global wait, hid_us, wait1, target_name, target_message, wait_for_command_vernut, wait_for_command_vernut1, us, us_unshifr, target_message_for_vernut, a
     if message.text == "написать":
         bot.send_message(message.from_user.id, "напиши юзернейм кому ты хочешь написать")
         us = message.from_user.id
@@ -83,38 +80,42 @@ def anonim(message):
         hid_us = cyph(us)
         #print(message.text)
         wait = True
-        wait1 = True
-    if message.text != "написать" and wait:
+        wait1 = False
+    elif wait and not wait1:
         target_name = message.text
         print(target_name)
         bot.send_message(message.from_user.id, "введи сообщение которое надо отправить")
         wait = False
         wait1 = True
-    elif message.text != "введи сообщение которое надо отправить" and message.text != "напиши юзернейм кому ты хочешь написать" and message.text != "написать" and wait == False and wait1:
+    elif not wait and wait1:
+        wait1 = False
         target_message = message.text
         f = open('saves.txt', 'r')
         for line in f:
             if target_name in line:
                 bot.send_message(line.split()[1], target_message)
                 text = "айди отправителя " + str(hid_us)
-                bot.send_message(message.from_user.id, text)
+                bot.send_message(line.split()[1], text)
+                bot.send_message(message.from_user.id, "сообщение отправленно")
         f.close()
     elif message.text == "вернуть":
         bot.send_message(message.from_user.id, "напиши айди который тебе прислал бот")
         wait_for_command_vernut = True
         wait_for_command_vernut1 = False
-    elif message.text != "вернуть" and wait_for_command_vernut and message.text != "напиши айди который тебе прислал бот" and wait_for_command_vernut1 == False:
+    elif wait_for_command_vernut and not wait_for_command_vernut1:
         us = message.text
         us_unshifr = uncyph(us)
         bot.send_message(message.from_user.id, "введи сообщение")
         wait_for_command_vernut = False
         wait_for_command_vernut1 = True
-    elif message.text != "введи сообщение" and message.text != "вернуть" and message.text != "напиши айди который тебе прислал бот" and wait_for_command_vernut == False and wait_for_command_vernut1:
+    elif not wait_for_command_vernut and wait_for_command_vernut1:
         target_message_for_vernut = message.text
         f = open('saves.txt', 'r')
         for line in f:
             if str(us_unshifr) in line:
                 bot.send_message(line.split()[1], target_message_for_vernut)
+                text_for_vozvrat = message.from_user.id
+                bot.send_message(line.split()[1], "сообщение написал: " + str(text_for_vozvrat))
 
 
 # привет я бот анонимка напиши мне имя пользователея и я напишу ему от своего лица твоё сообшение
